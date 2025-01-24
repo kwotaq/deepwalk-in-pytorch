@@ -1,3 +1,4 @@
+import os
 from random import choice
 
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ from sklearn.manifold import TSNE
 from torch import optim, tensor
 
 class DeepWalk(nn.Module):
-    def __init__(self, embedding_dim, graph=nx.karate_club_graph()):
+    def __init__(self, embedding_dim, graph):
         super().__init__()
         self.graph = graph
         num_nodes = graph.number_of_nodes()
@@ -67,10 +68,14 @@ class DeepWalk(nn.Module):
 
         print("Training finished.")
 
-def get_integer_input(prompt, min_value=None, max_value=None):
+def get_integer_input(prompt, min_value=None, max_value=None, default=None):
+    print("Press Enter to skip.")
     while True:
+        user_input = input(prompt).strip()
+        if user_input == "":
+            return default
         try:
-            value = int(input(prompt))
+            value = int(user_input)
             if min_value is not None and value < min_value:
                 print(f"Value must be at least {min_value}.")
                 continue
@@ -81,22 +86,35 @@ def get_integer_input(prompt, min_value=None, max_value=None):
         except ValueError:
             print("Invalid input. Please enter an integer.")
 
-use_default = input("Do you want to run with default parameters? (yes/no): ").strip().lower()
+def get_graph_from_terminal(prompt, default):
+    print("Press Enter to skip.")
+    while True:
+        file_path = input(prompt).strip()
+        if file_path == "":
+            return default
+        if os.path.isfile(file_path):
+            return nx.read_edgelist(file_path, nodetype=int)
+        else:
+            print("Invalid file path. Please enter a valid path to an existing file.")
 
-if use_default == 'yes':
-    walk_length = 8  # Default values
-    num_walks = 10
-    window_size = 5
-    embedding_dim = 16
-    epochs = 50
-    lr = 0.001
-else:
-    walk_length = get_integer_input("Enter walk length: ", min_value=1)
-    num_walks = get_integer_input("Enter the number of walks: ", min_value=1)
-    window_size = get_integer_input("Enter window size: ", min_value=1, max_value=walk_length)
-    embedding_dim = get_integer_input("Enter embedding dimensions: ", min_value=1)
-    epochs = get_integer_input("Enter number of epochs: ", min_value=1)
-    lr = get_integer_input("Enter learning rate: ", min_value=0.0001, max_value=0.1)
+use_default = input("Do you want to run with default parameters (Default graph is Zachary Karate Club Graph)? (yes/no): ").strip().lower()
+
+graph = nx.karate_club_graph()
+walk_length = 8  # Default values
+num_walks = 10
+window_size = 5
+embedding_dim = 16
+epochs = 50
+lr = 0.001
+
+if use_default == 'no':
+    graph = get_graph_from_terminal("Enter the path to the graph file: ", default=graph)
+    walk_length = get_integer_input("Enter walk length: ", min_value=1, default=walk_length)
+    num_walks = get_integer_input("Enter the number of walks: ", min_value=1, default=num_walks)
+    window_size = get_integer_input("Enter window size: ", min_value=1, max_value=walk_length, default=window_size)
+    embedding_dim = get_integer_input("Enter embedding dimensions: ", min_value=1, default=embedding_dim)
+    epochs = get_integer_input("Enter number of epochs: ", min_value=1, default=epochs)
+    lr = get_integer_input("Enter learning rate: ", min_value=0.0001, max_value=0.1, default=lr)
 
 print("Running DeepWalk model with parameters:")
 print(f"Walk Length: {walk_length}")
@@ -106,7 +124,8 @@ print(f"Embedding Dimensions: {embedding_dim}")
 print(f"Epochs: {epochs}")
 print(f"Learning Rate: {lr}")
 
-model = DeepWalk(embedding_dim)
+# Initialize model
+model = DeepWalk(embedding_dim, graph)
 model.train_model(window_size, lr, epochs, walk_length, num_walks)
 
 # Extract embeddings from the model for use
@@ -123,7 +142,7 @@ tsne = TSNE(n_components=2,
             init='pca',
             random_state=0).fit_transform(embeddings)
 
-# Plot TSNE using labels created by k-means
+# Plot TSNE using labels created with k-means
 plt.figure(figsize=(6, 6))
 plt.scatter(tsne[:, 0], tsne[:, 1], s=100, c=labels, cmap="coolwarm")
 plt.show()
