@@ -85,31 +85,29 @@ use_default = input("Do you want to run with default parameters? (yes/no): ").st
 
 if use_default == 'yes':
     walk_length = 8  # Default values
-    max_num_walks = 100
+    num_walks = 10
     window_size = 5
     embedding_dim = 16
     epochs = 50
     lr = 0.001
-    graph = nx.karate_club_graph()
 else:
     walk_length = get_integer_input("Enter walk length: ", min_value=1)
-    max_num_walks = get_integer_input("Enter max number of walks: ", min_value=1)
+    num_walks = get_integer_input("Enter the number of walks: ", min_value=1)
     window_size = get_integer_input("Enter window size: ", min_value=1, max_value=walk_length)
     embedding_dim = get_integer_input("Enter embedding dimensions: ", min_value=1)
     epochs = get_integer_input("Enter number of epochs: ", min_value=1)
     lr = get_integer_input("Enter learning rate: ", min_value=0.0001, max_value=0.1)
-    graph =  nx.read_edgelist("data.txt", nodetype = int)
 
 print("Running DeepWalk model with parameters:")
 print(f"Walk Length: {walk_length}")
-print(f"Max Number of Walks: {max_num_walks}")
+print(f"Number of Walks: {num_walks}")
 print(f"Window Size: {window_size}")
 print(f"Embedding Dimensions: {embedding_dim}")
 print(f"Epochs: {epochs}")
 print(f"Learning Rate: {lr}")
 
 model = DeepWalk(embedding_dim)
-model.train_model(window_size, lr, epochs, walk_length, max_num_walks)
+model.train_model(window_size, lr, epochs, walk_length, num_walks)
 
 # Extract embeddings from the model for use
 embeddings = model.get_embeddings().numpy()
