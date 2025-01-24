@@ -14,7 +14,6 @@ Open a terminal in the project's directory and run the following commands:
 ```
 python -m venv venv
 source venv/bin/activate
-pip install --upgrade pip
 pip install -r requirements.txt
 python DeepWalk.py
 ```
@@ -24,7 +23,6 @@ python DeepWalk.py
 ```
 python -m venv venv
 venv\Scripts\activate.bat
-pip install --upgrade pip
 pip install -r requirements.txt
 python DeepWalk.py
 ```
