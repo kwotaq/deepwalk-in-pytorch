@@ -17,8 +17,8 @@ class DeepWalk(nn.Module):
         self.decode = nn.Linear(embedding_dim, num_nodes)
 
     def forward(self, inputs):
-        embeds = self.encode(inputs).mean(0)
-        return self.decode(embeds)
+        hidden = self.encode(inputs).mean(0)
+        return self.decode(hidden)
 
     def get_embeddings(self):
         return self.decode.weight.detach()
