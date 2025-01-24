@@ -93,7 +93,11 @@ def get_graph_from_terminal(prompt, default):
         if file_path == "":
             return default
         if os.path.isfile(file_path):
-            return nx.read_edgelist(file_path, nodetype=int)
+            try:
+                graph = nx.read_edgelist(file_path)  # Attempt to load as a networkx graph
+                return graph
+            except Exception:
+                print("Invalid graph file. Please enter a valid NetworkX graph file.")
         else:
             print("Invalid file path. Please enter a valid path to an existing file.")
 
