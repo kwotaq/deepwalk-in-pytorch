@@ -68,7 +68,7 @@ class DeepWalk(nn.Module):
 
         print("Training finished.")
 
-def get_integer_input(prompt, min_value=None, max_value=None, default=None):
+def get_integer_input(prompt, min_value=None, max_value=None, must_be_odd=False, default=None):
     print("Press Enter to skip.")
     while True:
         user_input = input(prompt).strip()
@@ -81,6 +81,9 @@ def get_integer_input(prompt, min_value=None, max_value=None, default=None):
                 continue
             if max_value is not None and value > max_value:
                 print(f"Value must be at most {max_value}.")
+                continue
+            if must_be_odd and value % 2 == 0:
+                print("Value must be an odd number.")
                 continue
             return value
         except ValueError:
@@ -115,7 +118,7 @@ if use_default == 'no':
     graph = get_graph_from_terminal("Enter the path to the graph file: ", default=graph)
     walk_length = get_integer_input("Enter walk length: ", min_value=1, default=walk_length)
     num_walks = get_integer_input("Enter the number of walks: ", min_value=1, default=num_walks)
-    window_size = get_integer_input("Enter window size: ", min_value=1, max_value=walk_length, default=window_size)
+    window_size = get_integer_input("Enter window size: ", min_value=1, max_value=walk_length, must_be_odd=True, default=window_size)
     embedding_dim = get_integer_input("Enter embedding dimensions: ", min_value=1, default=embedding_dim)
     epochs = get_integer_input("Enter number of epochs: ", min_value=1, default=epochs)
     lr = get_integer_input("Enter learning rate: ", min_value=0.0001, max_value=0.1, default=lr)
