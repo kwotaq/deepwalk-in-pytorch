@@ -104,13 +104,20 @@ def get_graph_from_terminal(prompt, default):
         else:
             print("Invalid file path. Please enter a valid path to an existing file.")
 
-use_default = input("Do you want to run with default parameters (Default graph is Zachary Karate Club Graph)? (yes/no): ").strip().lower()
+def get_yes_no_input(prompt):
+    while True:
+        user_input = input(prompt + " (yes/no): ").strip().lower()
+        if user_input in ["yes", "no"]:
+            return user_input
+        print("Invalid input. Please enter 'yes' or 'no'.")
+
+use_default = get_yes_no_input("Do you want to run with default parameters (default graph is Zachary Karate Club Graph)? (yes/no): ")
 
 graph = nx.karate_club_graph()
-walk_length = 8  # Default values
-num_walks = 10
+walk_length = 10  # Default values
+num_walks = 12
 window_size = 5
-embedding_dim = 16
+embedding_dim = 32
 epochs = 50
 lr = 0.001
 
@@ -138,8 +145,13 @@ model.train_model(window_size, lr, epochs, walk_length, num_walks)
 # Extract embeddings from the model for use
 embeddings = model.get_embeddings().numpy()
 
+n_clusters = 2  # Default number of clusters
+use_default = get_yes_no_input("Do you want to plot the default amount of cluster labels (defaults to 2)? (yes/no): ")
+
+if use_default == 'no':
+    n_clusters = get_integer_input("Enter number of clusters: ", min_value=2, default=n_clusters)
+
 # Retrieve labels from embeddings using k-means
-n_clusters = 2  # Number of clusters
 kmeans = KMeans(n_clusters=n_clusters, random_state=42)
 labels = kmeans.fit_predict(embeddings)
 
@@ -152,4 +164,6 @@ tsne = TSNE(n_components=2,
 # Plot TSNE using labels created with k-means
 plt.figure(figsize=(6, 6))
 plt.scatter(tsne[:, 0], tsne[:, 1], s=100, c=labels, cmap="coolwarm")
+title = f"Scatterplot of node embeddings for {n_clusters} clusters. \nParameters used: embedding dimensions: {embedding_dim}, number of walks: {num_walks}, walk length: {walk_length}, window size: {window_size}"
+plt.title(title, loc='center', wrap=True)
 plt.show()
