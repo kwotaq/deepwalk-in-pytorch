@@ -1,5 +1,7 @@
 # A Simple DeepWalk implementation using PyTorch
 
+This implementation uses CBOW instead of Skip-Gram
+
 ## Prerequisites
 Ensure you have the following installed on your system:
 
